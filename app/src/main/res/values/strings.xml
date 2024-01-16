@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Read Notepad</string>
+    <string name="add">Add\n</string>
+    <string name="ok">OK</string>
+</resources>

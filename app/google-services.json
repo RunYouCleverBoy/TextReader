@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "466969254325",
+    "project_id": "read-it-cb483",
+    "storage_bucket": "read-it-cb483.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:466969254325:android:8ef52ed572cb881030e1fc",
+        "android_client_info": {
+          "package_name": "com.rycbar.read"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxROIjCnO9jpMvTdi8yOLIxekB16QiGok"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
