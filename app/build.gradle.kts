@@ -13,7 +13,7 @@ android {
         minSdk = 33
         targetSdk = 34
         versionName = "0.0.2"
-        versionCode = versionName!!.split(".").map { it.toInt() }.foldRight(0) { acc, i -> acc * 100 + i }
+        versionCode = versionName!!.split(".").map { it.toInt() }.reduce { acc, i -> acc * 100 + i }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
