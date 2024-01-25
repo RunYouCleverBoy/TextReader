@@ -5,9 +5,12 @@ import com.rycbar.read.speech.SentenceSplitter
 import com.rycbar.read.speech.SpeechRepo
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 
 @Module
+@InstallIn(ViewModelComponent::class)
 class ReadModule {
     @Provides
     fun getSpeechRepo(@ApplicationContext context: Context): SpeechRepo {
