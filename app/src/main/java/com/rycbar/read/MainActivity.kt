@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val enableButtons = !state.shouldShowText
+                    val enableButtons = !state.editMode
                     Scaffold(topBar = { TopBar(enableButtons, viewModel::dispatchEvent) }) { paddingValues ->
                         Column(
                             modifier = Modifier
@@ -73,14 +73,14 @@ class MainActivity : ComponentActivity() {
                                 }
                             })
                             var inputText by remember { mutableStateOf("") }
-                            if (state.shouldShowText) {
+                            if (state.editMode) {
                                 TextRow(inputText, onTextChanged = { inputText = it }, onOk = {
                                     viewModel.dispatchEvent(Event.OnNewText(applicationContext, inputText))
                                 })
                             } else {
                                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                                    items(state.parsed.size) { index ->
-                                        Text(text = state.parsed[index])
+                                    items(state.paragraphs.size) { index ->
+                                        Text(text = state.paragraphs[index])
                                     }
                                 }
                             }
