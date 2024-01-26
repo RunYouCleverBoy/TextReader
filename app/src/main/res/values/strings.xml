@@ -4,4 +4,6 @@
     <string name="add">Add\n</string>
     <string name="ok">OK</string>
     <string name="clear">Clear</string>
+    <string name="paste">Paste</string>
+    <string name="edit_text_hint">You can type or paste text over here.\nThen click the ✅symbol to start.</string>
 </resources>

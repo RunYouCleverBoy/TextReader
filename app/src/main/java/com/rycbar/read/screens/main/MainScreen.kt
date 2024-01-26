@@ -17,7 +17,7 @@ import androidx.lifecycle.Lifecycle
 import com.rycbar.read.screens.main.mvi.MainEvent
 import com.rycbar.read.screens.main.mvi.MainState
 import com.rycbar.read.ui.components.ParagraphText
-import com.rycbar.read.ui.components.TextRow
+import com.rycbar.read.ui.components.TextEditor
 import com.rycbar.read.ui.components.TopBar
 import com.rycbar.read.ui.theme.ReadNotepadTheme
 import com.rycbar.read.ui.utils.OnLifecycleEvent
@@ -48,7 +48,7 @@ fun MainScreen(state: MainState, dispatchEvent: (MainEvent) -> Unit) {
                 ) {
                     var inputText by remember { mutableStateOf("") }
                     if (state.editMode) {
-                        TextRow(inputText, onTextChanged = { inputText = it }, onOk = {
+                        TextEditor(inputText, onTextChanged = { inputText = it }, onOk = {
                             dispatchEvent(
                                 MainEvent.OnNewText(
                                     inputText
@@ -56,6 +56,8 @@ fun MainScreen(state: MainState, dispatchEvent: (MainEvent) -> Unit) {
                             )
                         }, onClear = {
                             inputText = ""
+                        }, onPaste = {
+                            dispatchEvent(MainEvent.OnPaste)
                         })
                     } else {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {

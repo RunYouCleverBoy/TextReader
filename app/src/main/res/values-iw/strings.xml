@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">עין הקורא</string>
+    <string name="app_name">קורא טקסט</string>
+    <string name="top_bar_label">עין הקורא</string>
     <string name="add">הוספה</string>
     <string name="ok">אישור</string>
     <string name="clear">ניקוי</string>
+    <string name="paste">הדבק</string>
+    <string name="edit_text_hint">כאן אפשר להדביק או לכתוב טקסט, ולסיום: ✅</string>
 </resources>

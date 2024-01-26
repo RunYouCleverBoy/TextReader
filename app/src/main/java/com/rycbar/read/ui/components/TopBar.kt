@@ -30,7 +30,7 @@ fun TopBar(enableButtons: Boolean, onEvent: (MainEvent) -> Unit = {}) {
             .height(56.dp)
             .padding(16.dp)
     ) {
-        Text(text = "Read Notepad", modifier = Modifier.weight(1f))
+        Text(text = stringResource(id = R.string.top_bar_label), modifier = Modifier.weight(1f))
         Spacer(modifier = Modifier.size(24.dp))
         if (enableButtons) {
             IconButton(onClick = { onEvent(MainEvent.OnAddClicked) }) {

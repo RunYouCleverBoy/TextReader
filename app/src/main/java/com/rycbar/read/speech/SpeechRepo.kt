@@ -70,8 +70,10 @@ class SpeechRepo @Inject constructor(@ApplicationContext val context: Context) {
 
     fun spoolJobs(jobs: List<UtteranceJob>) {
         pendingTexts.addAll(jobs)
+        Log.v(TAG, "spoolJobs: Spooling ${jobs.size} jobs")
         jobs.forEach { (id, text) ->
-            tts?.speak(text, TextToSpeech.QUEUE_ADD, null, id)
+            val code = tts?.speak(text, TextToSpeech.QUEUE_ADD, null, id)
+            Log.v(TAG, "code: $code, id: $id, text: $text")
         }
     }
 
@@ -133,5 +135,6 @@ class SpeechRepo @Inject constructor(@ApplicationContext val context: Context) {
 
     companion object {
         private const val PROGRESS_TAG = "UtteranceProgressHandler"
+        private const val TAG = "SpeechRepo"
     }
 }

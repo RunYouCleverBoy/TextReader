@@ -3,6 +3,7 @@ package com.rycbar.read.di
 import android.content.Context
 import com.rycbar.read.speech.SentenceSplitter
 import com.rycbar.read.speech.SpeechRepo
+import com.rycbar.read.systemutils.Clipboard
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,5 +26,10 @@ class ReadModule {
     @Provides
     fun getContext(@ApplicationContext context: Context): Context {
         return context
+    }
+
+    @Provides
+    fun provideClipboard(@ApplicationContext context: Context): Clipboard {
+        return Clipboard(context)
     }
 }
