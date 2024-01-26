@@ -18,12 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rycbar.read.screens.main.Event
 import com.rycbar.read.R
+import com.rycbar.read.screens.main.mvi.MainEvent
 import com.rycbar.read.ui.theme.ReadNotepadTheme
 
 @Composable
-fun TopBar(enableButtons: Boolean, onEvent: (Event) -> Unit = {}) {
+fun TopBar(enableButtons: Boolean, onEvent: (MainEvent) -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -33,21 +33,21 @@ fun TopBar(enableButtons: Boolean, onEvent: (Event) -> Unit = {}) {
         Text(text = "Read Notepad", modifier = Modifier.weight(1f))
         Spacer(modifier = Modifier.size(24.dp))
         if (enableButtons) {
-            IconButton(onClick = { onEvent(Event.OnAddClicked) }) {
+            IconButton(onClick = { onEvent(MainEvent.OnAddClicked) }) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = stringResource(id = R.string.add),
                     modifier = Modifier.size(24.dp)
                 )
             }
-            IconButton(onClick = { onEvent(Event.OnPause) }) {
+            IconButton(onClick = { onEvent(MainEvent.OnPause) }) {
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = stringResource(id = R.string.add),
                     modifier = Modifier.size(24.dp)
                 )
             }
-            IconButton(onClick = { onEvent(Event.OnResume) }) {
+            IconButton(onClick = { onEvent(MainEvent.OnResume) }) {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = stringResource(id = R.string.add),

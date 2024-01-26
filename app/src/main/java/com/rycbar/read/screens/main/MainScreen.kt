@@ -14,6 +14,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
+import com.rycbar.read.screens.main.mvi.MainEvent
+import com.rycbar.read.screens.main.mvi.MainState
 import com.rycbar.read.ui.components.ParagraphText
 import com.rycbar.read.ui.components.TextRow
 import com.rycbar.read.ui.components.TopBar
@@ -21,7 +23,7 @@ import com.rycbar.read.ui.theme.ReadNotepadTheme
 import com.rycbar.read.ui.utils.OnLifecycleEvent
 
 @Composable
-fun MainScreen(state: State, dispatchEvent: (Event) -> Unit) {
+fun MainScreen(state: MainState, dispatchEvent: (MainEvent) -> Unit) {
     ReadNotepadTheme {
         // A surface container using the 'background' color from the theme
         Surface(
@@ -36,7 +38,7 @@ fun MainScreen(state: State, dispatchEvent: (Event) -> Unit) {
                 )
             }) { paddingValues ->
                 OnLifecycleEvent(eventToHandle = Lifecycle.Event.ON_PAUSE) { _, _ ->
-                    dispatchEvent(Event.OnPause)
+                    dispatchEvent(MainEvent.OnPause)
                 }
 
                 Column(
@@ -48,7 +50,7 @@ fun MainScreen(state: State, dispatchEvent: (Event) -> Unit) {
                     if (state.editMode) {
                         TextRow(inputText, onTextChanged = { inputText = it }, onOk = {
                             dispatchEvent(
-                                Event.OnNewText(
+                                MainEvent.OnNewText(
                                     inputText
                                 )
                             )
@@ -59,7 +61,7 @@ fun MainScreen(state: State, dispatchEvent: (Event) -> Unit) {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                             items(state.paragraphs.size) { index ->
                                 ParagraphText(state, index) {
-                                    dispatchEvent(Event.OnParagraphClicked(index))
+                                    dispatchEvent(MainEvent.OnParagraphClicked(index))
                                 }
                             }
                         }

@@ -1,7 +1,7 @@
 package com.rycbar.read.speech
 
 import com.rycbar.read.models.UtteranceJob
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class SentenceSplitterTest {

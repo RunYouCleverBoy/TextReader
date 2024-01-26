@@ -87,15 +87,26 @@ class SpeechRepo @Inject constructor(@ApplicationContext val context: Context) {
         return byPriority.first{ it in availableLocales }
     }
 
+    private fun consumeUntil(utteranceId: String?): UtteranceJob? {
+        var job: UtteranceJob?
+        do {
+            job = pendingTexts.poll()
+        } while (job?.id != utteranceId)
+        return job
+    }
+
     private inner class UtteranceProgressHandler : UtteranceProgressListener() {
+        override fun onStart(utteranceId: String?) {
+            Log.v(PROGRESS_TAG, "onStart: $utteranceId")
+            _stateFlow.update { state ->
+                state.copy(currentJob = pendingTexts.find { it.id == utteranceId })
+            }
+        }
+
         override fun onDone(utteranceId: String?) {
             Log.v(PROGRESS_TAG, "onDone: $utteranceId")
-            var job: UtteranceJob?
-            do {
-                job = pendingTexts.poll()
-            } while (job?.id != utteranceId)
-
-            if (job == null) {
+            val job: UtteranceJob? = consumeUntil(utteranceId)
+            job?.let {
                 _stateFlow.update { state -> state.copy(currentJob = null) }
             }
         }
@@ -103,22 +114,23 @@ class SpeechRepo @Inject constructor(@ApplicationContext val context: Context) {
         @Suppress("OVERRIDE_DEPRECATION")
         override fun onError(utteranceId: String?) {
             Log.v(PROGRESS_TAG, "onError: $utteranceId")
-            val job = pendingTexts.find { it.id == utteranceId } ?: return
-            _errorFlow.tryEmit(job)
+            handleError(utteranceId)
         }
 
         override fun onError(utteranceId: String?, errorCode: Int) {
             Log.v(PROGRESS_TAG, "onError: $utteranceId, errorCode: $errorCode")
-            onError(utteranceId?:return)
+            handleError(utteranceId)
         }
 
-        override fun onStart(utteranceId: String?) {
-            Log.v(PROGRESS_TAG, "onStart: $utteranceId")
-            _stateFlow.update { state ->
-                state.copy(currentJob = pendingTexts.find { it.id == utteranceId })
+        private fun handleError(utteranceId: String?) {
+            val job = consumeUntil(utteranceId)
+            if (job == null) {
+                _stateFlow.update { state -> state.copy(currentJob = null) }
             }
+            job?.let { _errorFlow.tryEmit(it) }
         }
     }
+
     companion object {
         private const val PROGRESS_TAG = "UtteranceProgressHandler"
     }

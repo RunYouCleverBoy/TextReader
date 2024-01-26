@@ -2,6 +2,9 @@ package com.rycbar.read.screens.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rycbar.read.screens.main.mvi.MainEvent
+import com.rycbar.read.screens.main.mvi.MainState
+import com.rycbar.read.screens.main.mvi.ReadPosition
 import com.rycbar.read.speech.SentenceSplitter
 import com.rycbar.read.speech.SpeechRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,13 +25,13 @@ class MainViewModel @Inject constructor(
         speechRepo.init()
     }
     private val _stateFlow = MutableStateFlow(
-        State(
+        MainState(
             paragraphs = emptyList(),
             currentReadPosition = ReadPosition.NotStarted,
             editMode = true
         )
     )
-    val stateFlow: StateFlow<State> = _stateFlow
+    val stateFlow: StateFlow<MainState> = _stateFlow
 
     init {
         viewModelScope.launch {
@@ -37,15 +40,23 @@ class MainViewModel @Inject constructor(
                 collectFinishedJobs(speechState)
             }
         }
+        viewModelScope.launch {
+            speechRepo.errorFlow.collect { job ->
+                val position = sentenceSplitter.parseFinishedJobPosition(job)
+                _stateFlow.update { state ->
+                    state.copy(currentReadPosition = position.getAsUiPosition(true))
+                }
+            }
+        }
     }
 
-    fun dispatchEvent(event: Event) {
+    fun dispatchEvent(event: MainEvent) {
         when (event) {
-            is Event.OnNewText -> viewModelScope.launch { onNewText(event.text) }
-            Event.OnPause -> speechRepo.pause()
-            Event.OnResume -> speechRepo.resume()
-            Event.OnAddClicked -> _stateFlow.update { state -> state.copy(editMode = true) }
-            is Event.OnParagraphClicked -> {
+            is MainEvent.OnNewText -> viewModelScope.launch { onNewText(event.text) }
+            MainEvent.OnPause -> speechRepo.pause()
+            MainEvent.OnResume -> speechRepo.resume()
+            MainEvent.OnAddClicked -> _stateFlow.update { state -> state.copy(editMode = true) }
+            is MainEvent.OnParagraphClicked -> {
                 speechRepo.stop()
                 speechRepo.spoolJobs(
                     sentenceSplitter.paragraphsToJobs(
@@ -84,31 +95,14 @@ class MainViewModel @Inject constructor(
         val job = speechState.currentJob ?: return
         val position = sentenceSplitter.parseFinishedJobPosition(job)
         _stateFlow.update { state ->
-            state.copy(
-                currentReadPosition = ReadPosition.Position(
-                    paragraph = position.paragraphIndex,
-                    charSpan = position.range
-                )
-            )
+            state.copy(currentReadPosition = position.getAsUiPosition(false))
         }
     }
+
+    private fun SentenceSplitter.UtterancePosition.getAsUiPosition(asError: Boolean) = ReadPosition.Position(
+        paragraph = paragraphIndex,
+        charSpan = range,
+        isError = asError,
+    )
 }
 
-sealed class Event {
-    data object OnPause : Event()
-    data object OnResume : Event()
-    data object OnAddClicked : Event()
-    data class OnNewText(val text: String) : Event()
-    data class OnParagraphClicked(val index: Int) : Event()
-}
-
-sealed class ReadPosition {
-    class Position(val paragraph: Int, val charSpan: IntRange) : ReadPosition()
-    data object NotStarted : ReadPosition()
-}
-
-data class State(
-    val paragraphs: List<String>,
-    val currentReadPosition: ReadPosition,
-    val editMode: Boolean
-)
