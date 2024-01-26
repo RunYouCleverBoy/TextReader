@@ -51,7 +51,7 @@ fun TextRow(inputText: String, onTextChanged: (String) -> Unit, onOk: (String) -
                 Image(
                     colorFilter = ColorFilter.tint(Color.Green),
                     painter = painterResource(id = R.drawable.baseline_check_24),
-                    contentDescription = stringResource(id = R.string.ok)
+                    contentDescription = stringResource(id = R.string.clear)
                 )
             }
         }

@@ -26,7 +26,7 @@ fun ParagraphText(state: MainState, index: Int, onClick: () -> Unit) {
         val after = text.substring(span.last + 1)
         val color by remember(position.isError) {
             derivedStateOf {
-                if (position.isError) Color.Red else Color.Green
+                if (position.isError) Color.Red else Color.Yellow
             }
         }
         val styledText = buildAnnotatedString {
