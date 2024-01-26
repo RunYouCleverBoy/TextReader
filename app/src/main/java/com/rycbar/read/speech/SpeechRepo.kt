@@ -3,6 +3,7 @@ package com.rycbar.read.speech
 import android.content.Context
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.util.Log
 import com.rycbar.read.models.UtteranceJob
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
@@ -88,6 +89,7 @@ class SpeechRepo @Inject constructor(@ApplicationContext val context: Context) {
 
     private inner class UtteranceProgressHandler : UtteranceProgressListener() {
         override fun onDone(utteranceId: String?) {
+            Log.v(PROGRESS_TAG, "onDone: $utteranceId")
             var job: UtteranceJob?
             do {
                 job = pendingTexts.poll()
@@ -100,18 +102,24 @@ class SpeechRepo @Inject constructor(@ApplicationContext val context: Context) {
 
         @Suppress("OVERRIDE_DEPRECATION")
         override fun onError(utteranceId: String?) {
+            Log.v(PROGRESS_TAG, "onError: $utteranceId")
             val job = pendingTexts.find { it.id == utteranceId } ?: return
             _errorFlow.tryEmit(job)
         }
 
         override fun onError(utteranceId: String?, errorCode: Int) {
+            Log.v(PROGRESS_TAG, "onError: $utteranceId, errorCode: $errorCode")
             onError(utteranceId?:return)
         }
 
         override fun onStart(utteranceId: String?) {
+            Log.v(PROGRESS_TAG, "onStart: $utteranceId")
             _stateFlow.update { state ->
                 state.copy(currentJob = pendingTexts.find { it.id == utteranceId })
             }
         }
+    }
+    companion object {
+        private const val PROGRESS_TAG = "UtteranceProgressHandler"
     }
 }

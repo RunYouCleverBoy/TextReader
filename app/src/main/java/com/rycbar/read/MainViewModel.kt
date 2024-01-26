@@ -17,8 +17,11 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     val speechRepo: SpeechRepo,
-    val sentenceSplitter: SentenceSplitter) : ViewModel() {
-    private val speechRepoDeferred: Deferred<Boolean>
+    val sentenceSplitter: SentenceSplitter
+) : ViewModel() {
+    private val speechRepoDeferred: Deferred<Boolean> = viewModelScope.async {
+        speechRepo.init()
+    }
     private val _stateFlow = MutableStateFlow(
         State(
             paragraphs = emptyList(),
@@ -29,18 +32,10 @@ class MainViewModel @Inject constructor(
     val stateFlow: StateFlow<State> = _stateFlow
 
     init {
-        speechRepoDeferred = viewModelScope.async {
-            speechRepo.init()
-        }
         viewModelScope.launch {
             speechRepoDeferred.await()
-            sentenceSplitter.stateFlow.collect{ position ->
-                _stateFlow.update { state ->
-                    state.copy(currentReadPosition = ReadPosition.Position(
-                        paragraph = position.paragraphIndex,
-                        charSpan = position.range
-                    ))
-                }
+            speechRepo.stateFlow.collect { speechState ->
+                collectFinishedJobs(speechState)
             }
         }
     }
@@ -51,6 +46,17 @@ class MainViewModel @Inject constructor(
             Event.OnPause -> speechRepo.pause()
             Event.OnResume -> speechRepo.resume()
             Event.OnAddClicked -> _stateFlow.update { state -> state.copy(editMode = true) }
+            is Event.OnParagraphClicked -> {
+                speechRepo.stop()
+                speechRepo.spoolJobs(
+                    sentenceSplitter.paragraphsToJobs(
+                        _stateFlow.value.paragraphs.subList(
+                            event.index,
+                            _stateFlow.value.paragraphs.lastIndex
+                        )
+                    )
+                )
+            }
         }
     }
 
@@ -74,6 +80,19 @@ class MainViewModel @Inject constructor(
             speechRepo.spoolJobs(jobs)
         }
     }
+
+    private fun collectFinishedJobs(speechState: SpeechRepo.State) {
+        val job = speechState.currentJob ?: return
+        val position = sentenceSplitter.parseFinishedJobPosition(job)
+        _stateFlow.update { state ->
+            state.copy(
+                currentReadPosition = ReadPosition.Position(
+                    paragraph = position.paragraphIndex,
+                    charSpan = position.range
+                )
+            )
+        }
+    }
 }
 
 sealed class Event {
@@ -81,6 +100,7 @@ sealed class Event {
     data object OnResume : Event()
     data object OnAddClicked : Event()
     data class OnNewText(val appContext: Context, val text: String) : Event()
+    data class OnParagraphClicked(val index: Int) : Event()
 }
 
 sealed class ReadPosition {

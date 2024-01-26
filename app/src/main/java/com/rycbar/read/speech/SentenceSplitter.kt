@@ -2,8 +2,6 @@ package com.rycbar.read.speech
 
 import com.rycbar.read.models.UtteranceJob
 import com.rycbar.read.serializers.IntRangeSerializer
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -13,36 +11,36 @@ class SentenceSplitter {
     data class UtterancePosition(
         val paragraphIndex: Int,
         @Serializable(with = IntRangeSerializer::class) val range: IntRange
-    ) {
-        companion object {
-            val INVALID = UtterancePosition(-1, IntRange.EMPTY)
-        }
+    )
+    fun parseFinishedJobPosition(job: UtteranceJob): UtterancePosition {
+        return Json.decodeFromString(UtterancePosition.serializer(), job.id)
     }
 
-    private val _stateFlow = MutableStateFlow(UtterancePosition.INVALID)
-
-    fun onJobComplete(job: UtteranceJob) {
-        _stateFlow.value = Json.decodeFromString(UtterancePosition.serializer(), job.id)
-    }
-
-    val stateFlow: StateFlow<UtterancePosition> = _stateFlow
     fun paragraphsToJobs(paragraphs: List<String>): List<UtteranceJob> {
         val jobs = paragraphs.flatMapIndexed { paragraphIndex, paragraph ->
-            val sentences = paragraph.split(".")
-            val indicesMap = sentences.fold(mutableListOf<IntRange>()) { acc, sentence ->
-                val startIndex = acc.lastOrNull()?.last?.plus(1) ?: 0
-                acc.add(IntRange(startIndex, startIndex + sentence.length))
-                acc
+            val sentences = mutableListOf<Pair<IntRange, String>>()
+            var sentenceStart = 0
+            paragraph.forEachIndexed { i,c ->
+                if (c == '.') {
+                    val indexRange = sentenceStart..i
+                    sentences.add(indexRange to paragraph.substring(indexRange))
+                    sentenceStart = i + 1
+                }
             }
-            sentences.mapIndexed { sentenceIndex, sentence ->
+            sentences.add(sentenceStart..paragraph.length to paragraph.substring(sentenceStart))
+
+            sentences.mapNotNull { (indices, text) ->
+                if (text.isBlank() || text.none { it.isLetterOrDigit() }) {
+                    return@mapNotNull null
+                }
                 UtteranceJob(
                     Json.encodeToString(
                         UtterancePosition(
                             paragraphIndex,
-                            indicesMap[sentenceIndex]
+                            indices
                         )
                     ),
-                    sentence
+                    text.trim()
                 )
             }
         }
