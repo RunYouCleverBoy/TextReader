@@ -1,6 +1,5 @@
-package com.rycbar.read
+package com.rycbar.read.screens.main
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rycbar.read.speech.SentenceSplitter
@@ -99,7 +98,7 @@ sealed class Event {
     data object OnPause : Event()
     data object OnResume : Event()
     data object OnAddClicked : Event()
-    data class OnNewText(val appContext: Context, val text: String) : Event()
+    data class OnNewText(val text: String) : Event()
     data class OnParagraphClicked(val index: Int) : Event()
 }
 
