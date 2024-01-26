@@ -34,6 +34,26 @@ class SentenceSplitterTest {
     }
 
     @Test
+    fun splitToRanges() {
+        val paragraph = "Hello. Darkness my old friend. "
+        val ranges = sentenceSplitter.splitToRanges(paragraph)
+        assertEquals(3, ranges.size)
+        assertEquals(0..5, ranges[0].first)
+        assertEquals("Hello.", ranges[0].second)
+        assertEquals(6..paragraph.indexOfLast { it == '.' }, ranges[1].first)
+        assertEquals(" Darkness my old friend.", ranges[1].second)
+        assertEquals(" ", ranges[2].second)
+
+        val rangesForEmpty = sentenceSplitter.splitToRanges("")
+        assertEquals(0, rangesForEmpty.size)
+
+        val rangesForBlank = sentenceSplitter.splitToRanges("  ")
+        assertEquals(1, rangesForBlank.size)
+        assertEquals("  ", rangesForBlank[0].second)
+        assertEquals(0..1, rangesForBlank[0].first)
+    }
+
+    @Test
     fun textToParagraphs() {
         val paragraphs = sentenceSplitter.textToParagraphs("Hello\nDarkness my old friend\n\n")
         assertEquals(4, paragraphs.size)

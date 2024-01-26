@@ -1,5 +1,6 @@
 package com.rycbar.read.screens.main
 
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rycbar.read.screens.main.mvi.MainEvent
@@ -53,21 +54,32 @@ class MainViewModel @Inject constructor(
     fun dispatchEvent(event: MainEvent) {
         when (event) {
             is MainEvent.OnNewText -> viewModelScope.launch { onNewText(event.text) }
+            is MainEvent.Arguments -> onCreated(event)
             MainEvent.OnPause -> speechRepo.pause()
             MainEvent.OnResume -> speechRepo.resume()
             MainEvent.OnAddClicked -> _stateFlow.update { state -> state.copy(editMode = true) }
-            is MainEvent.OnParagraphClicked -> {
-                speechRepo.stop()
-                speechRepo.spoolJobs(
-                    sentenceSplitter.paragraphsToJobs(
-                        _stateFlow.value.paragraphs.subList(
-                            event.index,
-                            _stateFlow.value.paragraphs.lastIndex
-                        )
-                    )
-                )
-            }
+            is MainEvent.OnParagraphClicked -> onParagraphClicked(event)
         }
+    }
+
+    private fun onCreated(event: MainEvent.Arguments) {
+        val externalText = event.bundle.getString(Intent.EXTRA_PROCESS_TEXT)
+        if (externalText != null) {
+            _stateFlow.update { state -> state.copy(editMode = false) }
+            onNewText(externalText)
+        }
+    }
+
+    private fun onParagraphClicked(event: MainEvent.OnParagraphClicked) {
+        speechRepo.stop()
+        speechRepo.spoolJobs(
+            sentenceSplitter.paragraphsToJobs(
+                _stateFlow.value.paragraphs.subList(
+                    event.index,
+                    _stateFlow.value.paragraphs.lastIndex
+                )
+            )
+        )
     }
 
     private fun onNewText(text: String) {

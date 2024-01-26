@@ -15,7 +15,7 @@ android {
         applicationId = "com.rycbar.read"
         minSdk = 30
         targetSdk = 34
-        versionName = "0.1.0"
+        versionName = "0.1.1"
         versionCode = versionName!!.split(".").map { it.toInt() }.reduce { acc, i -> acc * 100 + i }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
